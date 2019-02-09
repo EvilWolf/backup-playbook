@@ -1,0 +1,42 @@
+- hosts: web
+  vars:
+    backup_from: /home/evilwolf/www/
+    backup_to: /root/backups/sites/
+    backup_current_dir: "{{ backup_to }}{{ ansible_date_time.date }}"
+    backup_age: "7d"
+  tasks:
+    - name: Create directory for backup
+      file:
+        state: directory
+        path: "{{ backup_current_dir }}"
+        mode: 0750
+      become: yes
+
+    - name: Collect websites
+      find:
+        file_type: directory
+        paths: "{{ backup_from }}"
+      register: sites_dir
+
+    - name: create archive by website
+      archive:
+        path: "{{ item.path }}"
+        dest: "{{ backup_current_dir }}/{{ item.path | basename }}.tar.gz"
+      loop: "{{ sites_dir.files }}"
+      become: yes
+
+    - name: Collect old backups
+      find:
+        file_type: directory
+        paths: "{{ backup_to }}"
+        age: "{{ backup_age }}"
+      register: old_backups
+      become: yes
+
+    - name: Remove old backups
+      file:
+        path: "{{ item.path }}"
+        state: absent
+        force: yes
+      loop: "{{ old_backups.files }}"
+      become: yes

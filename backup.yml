@@ -1,0 +1,3 @@
+- import_playbook: backup_db.yml
+- import_playbook: backup_sites.yml
+- import_playbook: backup_etc.yml

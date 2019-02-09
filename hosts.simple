@@ -1,0 +1,12 @@
+[test]
+evilwolf.ru
+localhost ansible_connection=local
+
+[apt]
+cloud.evilwolf.ru ansible_python_interpreter=/usr/bin/python3
+
+[web]
+cloud.evilwolf.ru ansible_python_interpreter=/usr/bin/python3
+
+[mysql]
+cloud.evilwolf.ru ansible_python_interpreter=/usr/bin/python3

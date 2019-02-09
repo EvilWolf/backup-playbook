@@ -1,0 +1,35 @@
+- hosts: web
+  vars:
+    backup_from: /etc
+    backup_to: /root/backups/configs/
+    backup_current_dir: "{{ backup_to }}{{ ansible_date_time.date }}"
+    backup_age: "7d"
+  tasks:
+    - name: Create directory for backup
+      file:
+        state: directory
+        path: "{{ backup_current_dir }}"
+        mode: 0750
+      become: yes
+
+    - name: create config archive
+      archive:
+        path: "{{ backup_from }}"
+        dest: "{{ backup_current_dir }}/etc.tar.gz"
+      become: yes
+
+    - name: Collect old backups
+      find:
+        file_type: directory
+        paths: "{{ backup_to }}"
+        age: "{{ backup_age }}"
+      register: old_backups
+      become: yes
+
+    - name: Remove old backups
+      file:
+        path: "{{ item.path }}"
+        state: absent
+        force: yes
+      loop: "{{ old_backups.files }}"
+      become: yes
